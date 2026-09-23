@@ -8,6 +8,7 @@
 
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-pgvector-4169E1?logo=postgresql&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/LLM-gpt--5.2-412991?logo=openai&logoColor=white)
+![FinBERT](https://img.shields.io/badge/NLP-FinBERT%20self--hosted-fbbf24?logo=huggingface&logoColor=white)
 ![SEC EDGAR](https://img.shields.io/badge/Data-SEC%20EDGAR-a78bfa)
 ![Kestra](https://img.shields.io/badge/Orchestration-Kestra-c084fc)
 ![Railway](https://img.shields.io/badge/Deploy-Railway-6b7280?logo=railway&logoColor=white)
@@ -101,6 +102,50 @@ on every path, not only the analytical ones.
 
 ---
 
+## The self-hosted sentiment model
+
+Six of the seven quantitative signals are arithmetic over retrieved
+financial data. The seventh runs a transformer locally.
+
+`ProsusAI/finbert` — BERT-base fine-tuned on financial text — is loaded
+once at application startup and runs CPU inference inside this process.
+There is no external inference endpoint and no sentiment API: the
+weights sit on the machine that serves the request, which is why
+`torch`, `transformers`, `tokenizers` and `safetensors` are in
+`requirements.txt`. Startup blocks until the model is ready, so the
+first request is never the one that pays for loading it.
+
+**The model is loaded once; the scores are not cached.** The other six
+signals are precomputed nightly into `quant_signals`. News sentiment is
+not, because the article set behind it changes through the day — a
+cached score would silently describe yesterday's news.
+
+**Truncation is by tokens, not characters.** The pipeline is built with
+`truncation=True`, which cuts at BERT's real 512-token boundary. An
+earlier `[:512]` character slice was discarding most of every article:
+512 tokens hold roughly 350-400 English words, 512 characters hold
+80-100. The misclassifications this caused on longer summaries are what
+surfaced it.
+
+**Aggregation is signed confidence, not label counting.** Each article
+contributes `+score` if positive, `-score` if negative, and zero if
+neutral; the mean is clipped to `[-1, 1]` for consistency with every
+other signal. A band of `±0.15` around zero is reported as neutral
+rather than as a weak direction.
+
+**Thin evidence is flagged rather than hidden.** Below ten
+company-specific articles in thirty days the signal is returned with
+`low_confidence: True` and says so in its own detail string. The
+threshold comes from observed data: large-caps typically yielded 60-75
+relevant articles in a thirty-day window, small and mid-caps 5-10.
+
+Relevance filtering happens upstream in `src/readers/news_reader.py`,
+which matches on LLM-derived common names rather than tickers or legal
+names. This module receives an already-filtered list and does nothing
+but score and aggregate it.
+
+---
+
 ## Project Structure
 
 ```bash
@@ -160,7 +205,7 @@ equitymind-core/
 │   │   ├── quality_signal.py              # Piotroski F-Score
 │   │   ├── consensus_signal.py            # analyst ratings and target prices
 │   │   ├── short_signal.py                # short interest, days to cover
-│   │   ├── news_sentiment_signal.py       # FinBERT — never cached, always live
+│   │   ├── news_sentiment_signal.py       # FinBERT, local inference
 │   │   └── *_signal_config.py             # thresholds for risk / quality / consensus / short
 │   ├── readers/                           # data access — one reader per source or table
 │   │   ├── snapshot_reader.py
@@ -244,6 +289,12 @@ Models are set in `config.py`, not the environment:
 LLM_MODEL       = "gpt-5.2"        # reports, classification, Discovery
 LLM_MODEL_LIGHT = "gpt-4o-mini"    # ticker extraction, data scope, news, greeting
 ```
+
+These two are the only hosted models. Sentiment scoring runs
+`ProsusAI/finbert` locally — it is pinned in
+`src/quant/news_sentiment_signal.py` rather than in `config.py` or the
+environment, because it is not interchangeable with the others.
+See [The self-hosted sentiment model](#the-self-hosted-sentiment-model).
 
 ---
 
