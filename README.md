@@ -1,5 +1,10 @@
 # equitymind-core
 
+> **MSc dissertation submission (1 October 2026):** the state of this
+> repository as submitted is tagged
+> [`v1.0-dissertation`](https://github.com/BoFu001/equitymind-core/releases/tag/v1.0-dissertation).
+> Development continues on `main`.
+
 [![Live Demo](https://img.shields.io/badge/Live-EquityMind-22d3ee?logo=vercel&logoColor=white)](https://equitymind-web.vercel.app)
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-Agent%20Graph-818cf8)](https://langchain-ai.github.io/langgraph/)
