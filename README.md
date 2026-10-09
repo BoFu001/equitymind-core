@@ -1,11 +1,7 @@
 # equitymind-core
 
-> **MSc dissertation submission (1 October 2026):** the state of this
-> repository as submitted is tagged
-> [`v1.0-dissertation`](https://github.com/BoFu001/equitymind-core/releases/tag/v1.0-dissertation).
-> Development continues on `main`.
+**▶ Try it live, no sign-up: [equitymind-web.vercel.app](https://equitymind-web.vercel.app)**
 
-[![Live Demo](https://img.shields.io/badge/Live-EquityMind-22d3ee?logo=vercel&logoColor=white)](https://equitymind-web.vercel.app)
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-Agent%20Graph-818cf8)](https://langchain-ai.github.io/langgraph/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-WebSocket-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
@@ -18,6 +14,11 @@
 ![Kestra](https://img.shields.io/badge/Orchestration-Kestra-c084fc)
 ![Railway](https://img.shields.io/badge/Deploy-Railway-6b7280?logo=railway&logoColor=white)
 ![MSc](https://img.shields.io/badge/INM363-MSc%20Dissertation-e879f9)
+
+> **MSc dissertation submission (1 October 2026):** the state of this
+> repository as submitted is tagged
+> [`v1.0-dissertation`](https://github.com/BoFu001/equitymind-core/releases/tag/v1.0-dissertation).
+> Development continues on `main`.
 
 The backend of EquityMind: an agentic RAG system that answers plain-English
 questions about US-listed equities with retrieved filings, computed
